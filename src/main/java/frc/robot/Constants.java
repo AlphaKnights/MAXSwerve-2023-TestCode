@@ -61,6 +61,20 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   }
 
+  public static final class PIDConstants{
+    public static final int pidIdx = 0;
+    public static final int kTimeoutMs = 100;
+    public static final int kNeutralDeadband = 1;
+    public static final int sensorUnitsPer100msPerSec = 2000;
+    public static final int kSlot = 0;
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kF = 0.0;
+    public static final double kIzone = 0.0;
+    public static final double kPeakOutput = 0.0;
+  }
+
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T, 13T, or 14T.
     // This changes the drive speed of the module (a pinion gear with more teeth will result in a
@@ -72,7 +86,7 @@ public final class Constants {
     public static final boolean kTurningEncoderInverted = true;
 
     // Calculations required for driving motor conversion factors and feed forward
-    public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
+    public static final double kDrivingMotorFreeSpeedRps = DriveMotorConstants.kFreeSpeedRpm / 60;
     public static final double kWheelDiameterMeters = 0.0762;
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
     // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15 teeth on the bevel pinion
@@ -131,7 +145,7 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
-  public static final class NeoMotorConstants {
+  public static final class DriveMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
 }
