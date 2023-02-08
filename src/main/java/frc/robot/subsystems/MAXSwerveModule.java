@@ -63,7 +63,7 @@ public class MAXSwerveModule {
     m_turningPIDController.setFeedbackDevice(m_turningEncoder);
 
     m_drivingFalcon.setNeutralMode(NeutralMode.Brake);
-    m_drivingFalcon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, Constants.PIDConstants.pidIdx, Constants.PIDConstants.kTimeoutMs);
+    m_drivingFalcon.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor,Constants.PIDConstants.pidIdx, Constants.PIDConstants.kTimeoutMs);//, 
     m_drivingFalcon.configSensorTerm(SensorTerm.Diff1, FeedbackDevice.IntegratedSensor, Constants.PIDConstants.kTimeoutMs);
     m_drivingFalcon.configSelectedFeedbackCoefficient(1, Constants.PIDConstants.pidIdx, Constants.PIDConstants.kTimeoutMs);
     m_drivingFalcon.configNeutralDeadband(Constants.PIDConstants.kNeutralDeadband, Constants.PIDConstants.kTimeoutMs);
@@ -80,6 +80,8 @@ public class MAXSwerveModule {
 		int closedLoopTimeMs = 1;
 		m_drivingFalcon.configClosedLoopPeriod(Constants.PIDConstants.kSlot, closedLoopTimeMs, Constants.PIDConstants.kTimeoutMs);
 		m_drivingFalcon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_Targets, 10);
+    m_drivingFalcon.setSelectedSensorPosition(0);
+    // m_drivingFalcon.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
     // Apply position and velocity conversion factors for the driving encoder. The
     // native units for position and velocity are rotations and RPM, respectively,
     // but we want meters and meters per second to use with WPILib's swerve APIs.
@@ -134,7 +136,8 @@ public class MAXSwerveModule {
     m_chassisAngularOffset = chassisAngularOffset;
     m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
     // m_drivingEncoder.setPosition(0);
-    m_drivingFalcon.getSensorCollection().setIntegratedSensorPosition(0, Constants.PIDConstants.kTimeoutMs);
+    // m_drivingFalcon.getSensorCollection().setIntegratedSensorPosition(0, Constants.PIDConstants.kTimeoutMs);
+    // m_drivingFalcon
   }
 
   /**
@@ -145,7 +148,7 @@ public class MAXSwerveModule {
   public SwerveModuleState getState() {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
-    return new SwerveModuleState(m_drivingFalcon.getSelectedSensorVelocity(),
+    return new SwerveModuleState(m_drivingFalcon.getSelectedSensorVelocity(0),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
@@ -158,7 +161,7 @@ public class MAXSwerveModule {
     // Apply chassis angular offset to the encoder position to get the position
     // relative to the chassis.
     return new SwerveModulePosition(
-        m_drivingFalcon.getSelectedSensorPosition(),
+        m_drivingFalcon.getSelectedSensorPosition(0),
         new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset));
   }
 
@@ -167,21 +170,28 @@ public class MAXSwerveModule {
    *
    * @param desiredState Desired state with speed and angle.
    */
-  public void setDesiredState(SwerveModuleState desiredState) {
+  public void setDesiredState(SwerveModuleState desiredState, int canId) {
     // Apply chassis angular offset to the desired state.
     SwerveModuleState correctedDesiredState = new SwerveModuleState();
+    // System.out.println(desiredState.speedMetersPerSecond);
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
     correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
-
+    // System.out.println(canId);
+    if(canId==2){
+      System.out.println(correctedDesiredState.angle);
+    }
     // Optimize the reference state to avoid spinning further than 90 degrees.
     SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
         new Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS MAX towards their respective setpoints.
     // m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-    m_drivingFalcon.set(TalonFXControlMode.Velocity, optimizedDesiredState.speedMetersPerSecond);
+    // System.out.println(optimizedDesiredState.speedMetersPerSecond);
+    m_drivingFalcon.set(TalonFXControlMode.PercentOutput, optimizedDesiredState.speedMetersPerSecond/9.6);
     m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
-
+    // System.out.println(optimizedDesiredState.speedMetersPerSecond);
+    // System.out.println(optimizedDesiredState.angle.getDegrees());
+    // System.out.println(canId);
     m_desiredState = desiredState;
   }
 
