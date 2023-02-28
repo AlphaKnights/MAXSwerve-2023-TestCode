@@ -88,11 +88,14 @@ public class RobotContainer {
         .setKinematics(DriveConstants.kDriveKinematics);
 
     // An example trajectory to follow. All units in meters.
+    // As of now only moves 3 meters, without way points. Needs to begin moving through targets
+    // Also getPose() needs to begin using photonVision 
     Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
         // Start at the origin facing the +X direction
         new Pose2d(0, 0, new Rotation2d(0)),
         // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        //List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        List.of(),
         // End 3 meters straight ahead of where we started, facing forward
         new Pose2d(3, 0, new Rotation2d(0)),
         config);
